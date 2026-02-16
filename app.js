@@ -633,9 +633,13 @@ function renderAuth() {
   const user = state.users.find((u) => u.id === state.currentUserId);
   if (user) {
     el.authState.innerHTML = `<div>Вы вошли как <b>${escapeHtml(user.email)}</b></div>`;
+    el.registerForm.classList.add("hidden");
+    el.loginForm.classList.add("hidden");
     el.logoutBtn.classList.remove("hidden");
   } else {
     el.authState.innerHTML = '<div class="small">Войдите или зарегистрируйтесь для добавления и модерации данных.</div>';
+    el.registerForm.classList.remove("hidden");
+    el.loginForm.classList.remove("hidden");
     el.logoutBtn.classList.add("hidden");
   }
 }
