@@ -635,11 +635,15 @@ function renderAuth() {
     el.authState.innerHTML = `<div>Вы вошли как <b>${escapeHtml(user.email)}</b></div>`;
     el.registerForm.classList.add("hidden");
     el.loginForm.classList.add("hidden");
+    el.registerForm.style.display = "none";
+    el.loginForm.style.display = "none";
     el.logoutBtn.classList.remove("hidden");
   } else {
     el.authState.innerHTML = '<div class="small">Войдите или зарегистрируйтесь для добавления и модерации данных.</div>';
     el.registerForm.classList.remove("hidden");
     el.loginForm.classList.remove("hidden");
+    el.registerForm.style.display = "grid";
+    el.loginForm.style.display = "grid";
     el.logoutBtn.classList.add("hidden");
   }
 }
