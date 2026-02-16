@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сенсорный портрет города</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <h1>Сенсорный портрет города</h1>
+
+      <section class="panel" id="auth-panel">
+        <h2>Аккаунт</h2>
+        <div id="auth-state"></div>
+        <form id="register-form" class="stack">
+          <input type="email" id="reg-email" placeholder="E-mail" required />
+          <input type="password" id="reg-password" placeholder="Пароль" required />
+          <button type="submit">Регистрация</button>
+        </form>
+        <form id="login-form" class="stack">
+          <input type="email" id="login-email" placeholder="E-mail" required />
+          <input type="password" id="login-password" placeholder="Пароль" required />
+          <button type="submit">Войти</button>
+        </form>
+        <button id="logout-btn" class="hidden danger">Выйти</button>
+      </section>
+
+      <section class="panel">
+        <h2>Слои</h2>
+        <div id="layer-toggles" class="stack"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Шаблоны карт</h2>
+        <div class="stack">
+          <select id="template-select"></select>
+          <button id="apply-template-btn">Применить шаблон</button>
+          <input type="text" id="new-template-name" placeholder="Название нового шаблона" />
+          <button id="save-template-btn">Сохранить текущие слои как шаблон</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Добавить объект</h2>
+        <div class="stack">
+          <select id="feature-layer-select"></select>
+          <select id="feature-type-select">
+            <option value="point">Точка</option>
+            <option value="route">Маршрут</option>
+          </select>
+          <button id="geolocate-btn" type="button">Использовать мою геолокацию</button>
+          <button id="start-draw-btn">Выбрать на карте</button>
+          <button id="clear-draw-btn">Очистить выбор</button>
+        </div>
+        <form id="feature-form" class="stack"></form>
+      </section>
+
+      <section class="panel">
+        <h2>Мой профиль</h2>
+        <div id="saved-items"></div>
+      </section>
+    </aside>
+
+    <main>
+      <div id="map"></div>
+      <div id="map-hint">Режим добавления: клик для точки, серия кликов для маршрута, двойной клик завершает линию.</div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
