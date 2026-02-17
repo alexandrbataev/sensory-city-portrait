@@ -34,6 +34,7 @@ const state = {
   leafletLayers: {},
   leafletFeatureMap: new Map(),
   temp: { marker: null, polyline: null },
+  userLocationLayer: null,
 };
 
 const map = L.map("map", { attributionControl: false }).setView([55.751244, 37.618423], 12);
@@ -45,6 +46,7 @@ for (const layer of LAYERS) {
   const group = L.layerGroup().addTo(map);
   state.leafletLayers[layer.id] = group;
 }
+addLocateControl();
 
 const el = {
   authState: document.getElementById("auth-state"),
@@ -106,6 +108,30 @@ function bindEvents() {
 
   map.on("click", onMapClick);
   map.on("dblclick", onMapDoubleClick);
+}
+
+function addLocateControl() {
+  const LocateControl = L.Control.extend({
+    options: { position: "topleft" },
+    onAdd() {
+      const container = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-locate");
+      const button = L.DomUtil.create("a", "locate-btn", container);
+      button.href = "#";
+      button.title = "Моё местоположение";
+      button.setAttribute("aria-label", "Моё местоположение");
+      button.innerHTML = '<span class="locate-arrow" aria-hidden="true">➤</span>';
+
+      L.DomEvent.on(button, "click", (event) => {
+        L.DomEvent.stop(event);
+        focusOnCurrentLocation();
+      });
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.disableScrollPropagation(container);
+      return container;
+    },
+  });
+
+  new LocateControl().addTo(map);
 }
 
 function renderLayerControls() {
@@ -275,6 +301,52 @@ async function geolocate() {
     },
     () => alert("Не удалось определить местоположение.")
   );
+}
+
+function focusOnCurrentLocation() {
+  if (!navigator.geolocation) {
+    alert("Геолокация не поддерживается браузером.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      map.setView([lat, lng], 16);
+      renderUserLocation([lat, lng]);
+    },
+    () => {
+      alert("Не удалось определить местоположение.");
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function renderUserLocation(coords) {
+  if (state.userLocationLayer) {
+    map.removeLayer(state.userLocationLayer);
+  }
+
+  const halo = L.circleMarker(coords, {
+    radius: 18,
+    stroke: false,
+    fillColor: "#3b82f6",
+    fillOpacity: 0.22,
+    interactive: false,
+  });
+
+  const dot = L.circleMarker(coords, {
+    radius: 7,
+    color: "#ffffff",
+    weight: 2,
+    fillColor: "#2563eb",
+    fillOpacity: 1,
+  }).bindPopup("Вы здесь");
+
+  state.userLocationLayer = L.layerGroup([halo, dot]).addTo(map);
+  dot.openPopup();
 }
 
 async function handleFeatureSubmit(event) {

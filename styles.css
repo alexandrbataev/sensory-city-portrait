@@ -190,6 +190,32 @@ main {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
+.leaflet-control-locate {
+  margin-top: 6px;
+}
+
+.leaflet-control-locate .locate-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #fff;
+}
+
+.leaflet-control-locate .locate-btn:hover {
+  background: #f6f8ff;
+}
+
+.leaflet-control-locate .locate-arrow {
+  display: inline-block;
+  font-size: 18px;
+  line-height: 1;
+  color: #2563eb;
+  transform: rotate(-90deg);
+}
+
 @media (max-width: 1000px) {
   #app {
     grid-template-columns: 1fr;
