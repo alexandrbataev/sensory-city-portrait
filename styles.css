@@ -213,7 +213,7 @@ main {
   font-size: 18px;
   line-height: 1;
   color: #2563eb;
-  transform: rotate(45deg);
+  transform: rotate(-45deg);
 }
 
 @media (max-width: 1000px) {
