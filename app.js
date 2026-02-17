@@ -35,6 +35,9 @@ const state = {
   leafletFeatureMap: new Map(),
   temp: { marker: null, polyline: null },
   userLocationLayer: null,
+  searchMarker: null,
+  searchDebounceId: null,
+  searchRequestSeq: 0,
 };
 
 const map = L.map("map", { attributionControl: false }).setView([55.751244, 37.618423], 12);
@@ -58,6 +61,9 @@ const el = {
   applyTemplateBtn: document.getElementById("apply-template-btn"),
   saveTemplateBtn: document.getElementById("save-template-btn"),
   newTemplateName: document.getElementById("new-template-name"),
+  mapSearchInput: document.getElementById("map-search-input"),
+  mapSearchBtn: document.getElementById("map-search-btn"),
+  mapSearchResults: document.getElementById("map-search-results"),
   featureLayerSelect: document.getElementById("feature-layer-select"),
   featureTypeSelect: document.getElementById("feature-type-select"),
   featureForm: document.getElementById("feature-form"),
@@ -87,6 +93,14 @@ function bindEvents() {
 
   el.applyTemplateBtn.addEventListener("click", applySelectedTemplate);
   el.saveTemplateBtn.addEventListener("click", saveCurrentTemplate);
+  el.mapSearchBtn.addEventListener("click", handleMapSearch);
+  el.mapSearchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleMapSearch();
+    }
+  });
+  el.mapSearchInput.addEventListener("input", handleSearchInput);
 
   el.featureLayerSelect.addEventListener("change", () => {
     if (el.featureLayerSelect.value === "personal_navigators") {
@@ -108,6 +122,97 @@ function bindEvents() {
 
   map.on("click", onMapClick);
   map.on("dblclick", onMapDoubleClick);
+}
+
+async function handleMapSearch() {
+  const query = text(el.mapSearchInput.value);
+  if (!query) return;
+
+  await performSearch(query);
+}
+
+function renderSearchResults(results) {
+  if (!Array.isArray(results) || results.length === 0) {
+    el.mapSearchResults.innerHTML = '<div class="small">Ничего не найдено.</div>';
+    return;
+  }
+
+  el.mapSearchResults.innerHTML = results
+    .map(
+      (item, index) =>
+        `<button type="button" class="search-result-item" data-search-index="${index}">${escapeHtml(item.display_name)}</button>`
+    )
+    .join("");
+
+  const buttons = el.mapSearchResults.querySelectorAll(".search-result-item");
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const idx = Number(button.dataset.searchIndex);
+      const item = results[idx];
+      if (!item) return;
+      el.mapSearchInput.value = item.display_name;
+      el.mapSearchResults.innerHTML = "";
+
+      const lat = Number(item.lat);
+      const lon = Number(item.lon);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+
+      map.setView([lat, lon], 16);
+
+      if (state.searchMarker) {
+        map.removeLayer(state.searchMarker);
+      }
+      state.searchMarker = L.marker([lat, lon]).addTo(map);
+      state.searchMarker.bindPopup(escapeHtml(item.display_name)).openPopup();
+    });
+  });
+}
+
+function handleSearchInput() {
+  const query = text(el.mapSearchInput.value);
+  if (state.searchDebounceId) {
+    clearTimeout(state.searchDebounceId);
+  }
+
+  if (query.length < 3) {
+    el.mapSearchResults.innerHTML = "";
+    return;
+  }
+
+  state.searchDebounceId = setTimeout(() => {
+    performSearch(query, { silent: true });
+  }, 300);
+}
+
+async function performSearch(query, options = {}) {
+  const seq = ++state.searchRequestSeq;
+  const silent = Boolean(options.silent);
+
+  if (!silent) {
+    el.mapSearchBtn.disabled = true;
+    el.mapSearchBtn.textContent = "Ищем...";
+  }
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=${encodeURIComponent(query)}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!response.ok) throw new Error("Search failed");
+
+    const data = await response.json();
+    if (seq !== state.searchRequestSeq) return;
+    renderSearchResults(data);
+  } catch {
+    if (!silent) {
+      el.mapSearchResults.innerHTML = '<div class="small">Не удалось выполнить поиск.</div>';
+    }
+  } finally {
+    if (!silent) {
+      el.mapSearchBtn.disabled = false;
+      el.mapSearchBtn.textContent = "Найти";
+    }
+  }
 }
 
 function addLocateControl() {

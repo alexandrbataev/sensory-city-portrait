@@ -117,6 +117,30 @@ main {
   height: 100vh;
 }
 
+#map-search-overlay {
+  position: absolute;
+  top: 14px;
+  left: 64px;
+  z-index: 950;
+  width: min(460px, calc(100% - 84px));
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+}
+
+.map-search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.map-search-row #map-search-btn {
+  width: auto;
+  min-width: 88px;
+}
+
 #map-hint {
   position: absolute;
   bottom: 14px;
@@ -177,6 +201,27 @@ main {
   margin-top: 12px;
 }
 
+.search-results {
+  display: grid;
+  gap: 8px;
+  max-height: 200px;
+  overflow: auto;
+  margin-top: 8px;
+}
+
+.search-result-item {
+  text-align: left;
+  padding: 8px 10px;
+  background: #f7faf8;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 400;
+}
+
+.search-result-item:hover {
+  background: #eef5f1;
+}
+
 .custom-pin {
   width: 28px;
   height: 28px;
@@ -227,5 +272,10 @@ main {
 
   #map {
     height: 52vh;
+  }
+
+  #map-search-overlay {
+    left: 12px;
+    width: calc(100% - 24px);
   }
 }
